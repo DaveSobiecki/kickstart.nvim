@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -229,6 +229,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  'ziglang/zig.vim',
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -657,9 +658,44 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+
+      -- zig lsp
+      local vim = vim
+      local Plug = vim.fn['plug#']
+
+      vim.g.zig_fmt_parse_errors = 0
+      vim.g.zig_fmt_autosave = 1
+      require('lspconfig').zls.setup {
+        -- Server-specific settings. See `:help lspconfig-setup`
+
+        -- omit the following line if `zls` is in your PATH
+        -- cmd = { 'K:/Repository/Zig/zls/zig-out/bin/zls.exe' },
+        -- There are two ways to set config options:
+        --   - edit your `zls.json` that applies to any editor that uses ZLS
+        --   - set in-editor config options with the `settings` field below.
+        --
+        -- Further information on how to configure ZLS:
+        -- https://zigtools.org/zls/configure/
+        settings = {
+          zls = {
+            -- Whether to enable build-on-save diagnostics
+            --
+            -- Further information about build-on save:
+            -- https://zigtools.org/zls/guides/build-on-save/
+            enable_build_on_save = true,
+
+            -- Neovim already provides basic syntax highlighting
+            semantic_tokens = 'partial',
+
+            -- omit the following line if `zig` is in your PATH
+            -- zig_exe_path = 'K:/Repository/Zig/zig-windows-x86_64-0.14.0-dev.3451+d8d2aa9af',
+          },
+        },
+      }
+
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
+        clangd = {},
+        --  gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
