@@ -189,6 +189,15 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- auto runner keymappings
+-- vim.keymap.set('n', '<leader>ec', ':RunCode<CR>', { noremap = true, silent = false })
+-- vim.keymap.set('n', '<leader>ef', ':RunFile<CR>', { noremap = true, silent = false })
+-- vim.keymap.set('n', '<leader>eft', ':RunFile tab<CR>', { noremap = true, silent = false })
+-- vim.keymap.set('n', '<leader>ep', ':RunProject<CR>', { noremap = true, silent = false })
+-- vim.keymap.set('n', '<leader>ec', ':RunClose<CR>', { noremap = true, silent = false })
+-- vim.keymap.set('n', '<leader>ecrf', ':CRFiletype<CR>', { noremap = true, silent = false })
+-- vim.keymap.set('n', '<leader>ecrp', ':CRProjects<CR>', { noremap = true, silent = false })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -230,6 +239,7 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   'ziglang/zig.vim',
+  'numToStr/Comment.nvim',
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -265,6 +275,40 @@ require('lazy').setup({
       },
     },
   },
+
+  -- Nvim tree - file tree
+  {
+    'nvim-tree/nvim-tree.lua',
+    version = '*',
+    lazy = false,
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      require('nvim-tree').setup {}
+    end,
+  },
+
+  { -- Automatically add closing brackets
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    config = true,
+    -- use opts = {} for passing setup options
+    -- this is equivalent to setup({}) function
+  },
+
+  { -- Shows indent lines
+    'lukas-reineke/indent-blankline.nvim',
+    main = 'ibl',
+    ---@module "ibl"
+    ---@type ibl.config
+    opts = {},
+  },
+
+  --  { -- code runner
+  --  'CRAG666/code_runner.nvim',
+  --  config = true,
+  --  },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
@@ -1021,6 +1065,12 @@ require('lazy').setup({
     },
   },
 })
+
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+require('nvim-tree').setup()
+require('Comment').setup()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
