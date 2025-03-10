@@ -438,12 +438,15 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          file_ignore_patterns = {
+            'node_modules',
+          },
+          --   mappings = {
+          --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+          --   },
+        },
+        pickers = {},
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -467,6 +470,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      -- Custom telescope keybinds
+      local custom_telescope = require('custom.telescope.multigrep')
+      vim.keymap.set('n', '<leader>sm', custom_telescope.live_multigrep, { desc = '[S]earch [M]ultigrep' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
