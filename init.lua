@@ -188,6 +188,8 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-d>', '<C-d>zz')
+vim.keymap.set('n', '<C-u>', '<C-u>zz')
 
 -- auto runner keymappings
 -- vim.keymap.set('n', '<leader>ec', ':RunCode<CR>', { noremap = true, silent = false })
@@ -240,7 +242,6 @@ require('lazy').setup({
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   'ziglang/zig.vim',
   'numToStr/Comment.nvim',
-
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -263,6 +264,101 @@ require('lazy').setup({
   -- options to `gitsigns.nvim`.
   --
   -- See `:help gitsigns` to understand what the configuration keys do
+
+  {
+    'mluders/comfy-line-numbers.nvim',
+    opts = {
+      labels = {
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '21',
+        '22',
+        '23',
+        '24',
+        '25',
+        '31',
+        '32',
+        '33',
+        '34',
+        '35',
+        '41',
+        '42',
+        '43',
+        '44',
+        '45',
+        '51',
+        '52',
+        '53',
+        '54',
+        '55',
+        '111',
+        '112',
+        '113',
+        '114',
+        '115',
+        '121',
+        '122',
+        '123',
+        '124',
+        '125',
+        '131',
+        '132',
+        '133',
+        '134',
+        '135',
+        '141',
+        '142',
+        '143',
+        '144',
+        '145',
+        '151',
+        '152',
+        '153',
+        '154',
+        '155',
+        '211',
+        '212',
+        '213',
+        '214',
+        '215',
+        '221',
+        '222',
+        '223',
+        '224',
+        '225',
+        '231',
+        '232',
+        '233',
+        '234',
+        '235',
+        '241',
+        '242',
+        '243',
+        '244',
+        '245',
+        '251',
+        '252',
+        '253',
+        '254',
+        '255',
+      },
+      up_key = 'j',
+      down_key = 'k',
+
+      -- Line numbers will be completely hidden for the following file/buffer types
+      hidden_file_types = { 'undotree' },
+      hidden_buffer_types = { 'terminal' },
+    },
+  },
+
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -471,7 +567,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       -- Custom telescope keybinds
-      local custom_telescope = require('custom.telescope.multigrep')
+      local custom_telescope = require 'custom.telescope.multigrep'
       vim.keymap.set('n', '<leader>sm', custom_telescope.live_multigrep, { desc = '[S]earch [M]ultigrep' })
 
       -- Slightly advanced example of overriding default behavior and theme
