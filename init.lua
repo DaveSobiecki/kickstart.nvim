@@ -191,6 +191,9 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<C-d>', '<C-d>zz')
 vim.keymap.set('n', '<C-u>', '<C-u>zz')
 
+vim.keymap.set('n', '<C-l>', ':NvimTreeFindFileToggle<CR>', { desc = 'Toggle File tree', noremap = true, silent = true })
+vim.keymap.set('n', '<C-S-l>', ':NvimTreeFindFileToggle<CR>60<C-w>>', { desc = 'Toggle File tree', noremap = true, silent = true })
+
 -- auto runner keymappings
 -- vim.keymap.set('n', '<leader>ec', ':RunCode<CR>', { noremap = true, silent = false })
 -- vim.keymap.set('n', '<leader>ef', ':RunFile<CR>', { noremap = true, silent = false })
@@ -372,8 +375,7 @@ require('lazy').setup({
     },
   },
 
-  -- Nvim tree - file tree
-  {
+  { -- Nvim tree - file tree
     'nvim-tree/nvim-tree.lua',
     version = '*',
     lazy = false,
@@ -381,7 +383,9 @@ require('lazy').setup({
       'nvim-tree/nvim-web-devicons',
     },
     config = function()
-      require('nvim-tree').setup {}
+      require('nvim-tree').setup {
+        view = { adaptive_size = true },
+      }
     end,
   },
 
