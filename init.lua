@@ -191,8 +191,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<C-d>', '<C-d>zz')
 vim.keymap.set('n', '<C-u>', '<C-u>zz')
 
-vim.keymap.set('n', '<C-l>', ':NvimTreeFindFileToggle<CR>', { desc = 'Toggle File tree', noremap = true, silent = true })
-vim.keymap.set('n', '<C-S-l>', ':NvimTreeFindFileToggle<CR>60<C-w>>', { desc = 'Toggle File tree', noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>;', ':NvimTreeFindFileToggle<CR>', { desc = 'Toggle File tree', noremap = true, silent = true })
 
 -- auto runner keymappings
 -- vim.keymap.set('n', '<leader>ec', ':RunCode<CR>', { noremap = true, silent = false })
@@ -382,11 +381,6 @@ require('lazy').setup({
     dependencies = {
       'nvim-tree/nvim-web-devicons',
     },
-    config = function()
-      require('nvim-tree').setup {
-        view = { adaptive_size = true },
-      }
-    end,
   },
 
   { -- Automatically add closing brackets
@@ -1175,8 +1169,52 @@ require('lazy').setup({
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
-require('nvim-tree').setup()
 require('Comment').setup()
+
+vim.api.nvim_create_autocmd({ 'VimResized' }, {
+  desc = 'Resize nvim-tree if nvim window got resized',
+
+  group = vim.api.nvim_create_augroup('NvimTreeResize', { clear = true }),
+  callback = function()
+    local percentage = 15
+
+    local ratio = percentage / 100
+    local width = math.floor(vim.go.columns * ratio)
+    vim.cmd('tabdo NvimTreeResize ' .. width)
+  end,
+})
+
+local HEIGHT_RATIO = 0.8
+local WIDTH_RATIO = 0.5
+require('nvim-tree').setup {
+  filters = { custom = { '^.git$' } },
+  view = {
+    float = {
+      enable = true,
+      open_win_config = function()
+        local screen_w = vim.opt.columns:get()
+        local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+        local window_w = screen_w * WIDTH_RATIO
+        local window_h = screen_h * HEIGHT_RATIO
+        local window_w_int = math.floor(window_w)
+        local window_h_int = math.floor(window_h)
+        local center_x = (screen_w - window_w) / 2
+        local center_y = ((vim.opt.lines:get() - window_h) / 2) - vim.opt.cmdheight:get()
+        return {
+          border = 'rounded',
+          relative = 'editor',
+          row = center_y,
+          col = center_x,
+          width = window_w_int,
+          height = window_h_int,
+        }
+      end,
+    },
+    width = function()
+      return math.floor(vim.opt.columns:get() * WIDTH_RATIO)
+    end,
+  },
+}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
