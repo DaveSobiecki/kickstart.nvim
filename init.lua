@@ -1,4 +1,4 @@
---[[
+--[[;
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
@@ -365,6 +365,13 @@ require('lazy').setup({
       hidden_file_types = { 'undotree' },
       hidden_buffer_types = { 'terminal' },
     },
+  },
+
+  {
+    'nvimdev/dashboard-nvim',
+    event = 'VimEnter',
+    config = function() end,
+    dependencies = { { 'nvim-tree/nvim-web-devicons' } },
   },
 
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
