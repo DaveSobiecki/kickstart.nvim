@@ -192,6 +192,8 @@ vim.keymap.set('n', '<C-d>', '<C-d>zz')
 vim.keymap.set('n', '<C-u>', '<C-u>zz')
 
 vim.keymap.set('n', '<Leader>;', ':NvimTreeFindFileToggle<CR>', { desc = 'Toggle File tree', noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>o', ':OverseerToggle<CR>', { desc = 'Toggle Overseer', noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>r', ':OverseerRun<CR>', { desc = 'Run Overseer Task', noremap = true, silent = true })
 
 -- auto runner keymappings
 -- vim.keymap.set('n', '<leader>ec', ':RunCode<CR>', { noremap = true, silent = false })
@@ -253,6 +255,17 @@ require('lazy').setup({
     lazy = true,
     cmd = { 'Git', 'Gpush', 'Gpull' },
   },
+
+  {
+    'stevearc/overseer.nvim',
+    opts = {},
+  },
+
+  {
+    'Civitasv/cmake-tools.nvim',
+    opts = {},
+  },
+
   {
     'mluders/comfy-line-numbers.nvim',
     opts = {
@@ -823,7 +836,22 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 
       local servers = {
-        clangd = {},
+        clangd = {
+          cmd = {
+            'clangd',
+            '--background-index',
+            '--clang-tidy',
+            '--header-insertion=iwyu',
+            '--completion-style=detailed',
+            '--function-arg-placeholders',
+            '--fallback-style=llvm',
+          },
+          init_options = {
+            usePlaceholders = true,
+            completeUnimported = true,
+            clangdFileStatus = true,
+          },
+        },
         --  gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -1117,7 +1145,21 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'cpp',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        'cmake', -- Add CMake for build file syntax highlighting
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1129,12 +1171,16 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+    config = function(plugin, opts)
+      -- Add these lines to explicitly configure the compiler
+      require('nvim-treesitter.install').compilers = { 'clang' }
+
+      -- Use pre-built parsers if compilation fails
+      require('nvim-treesitter.install').prefer_git = false
+
+      -- Then load with the opts
+      require('nvim-treesitter.configs').setup(opts)
+    end,
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
@@ -1188,6 +1234,7 @@ require('lazy').setup({
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+--required
 require('Comment').setup()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
