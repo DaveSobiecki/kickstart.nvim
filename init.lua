@@ -1243,8 +1243,29 @@ require('lazy').setup({
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'cpp', 'c', 'h', 'hpp', 'txt' },
+  callback = function()
+    vim.bo.tabstop = 2 -- Number of spaces a <Tab> represents
+    vim.bo.shiftwidth = 2 -- Number of spaces for auto-indentation
+    vim.bo.softtabstop = 2 -- Number of spaces when pressing <Tab>
+    vim.bo.expandtab = true -- Convert tabs to spaces
+  end,
+})
+
 --required
 require('Comment').setup()
+
+local function quickfix()
+  vim.lsp.buf.code_action {
+    filter = function(a)
+      return a.isPreferred
+    end,
+    apply = true,
+  }
+end
+
+vim.keymap.set('n', '<leader>af', quickfix, { noremap = true, silent = true, desc = 'Apply suggested quickfix' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
