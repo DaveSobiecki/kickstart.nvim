@@ -200,6 +200,25 @@ vim.keymap.set('n', '<Leader>;', ':NvimTreeFindFileToggle<CR>', { desc = 'Toggle
 vim.keymap.set('n', '<Leader>o', ':OverseerToggle<CR>', { desc = 'Toggle Overseer', noremap = true, silent = true })
 vim.keymap.set('n', '<Leader>r', ':OverseerRun<CR>', { desc = 'Run Overseer Task', noremap = true, silent = true })
 
+-- vim.keymap.set('n', '<leader>fz', function()
+--   -- Get the full path of the current buffer's file
+--   local current_file = vim.fn.expand '%:p'
+--
+--   -- Check if the file exists (important for new unsaved buffers)
+--   if current_file == '' then
+--     print 'No file open or file not saved.'
+--     return
+--   end
+--
+--   -- Construct the command
+--   local command = '!' .. 'zig fmt ' .. vim.shellescape(current_file)
+--
+--   -- Execute the command
+--   vim.cmd(command)
+--
+--   print('Formatted ' .. current_file .. ' with zig fmt')
+-- end, { desc = 'Format current file with zig fmt' })
+
 -- auto runner keymappings
 -- vim.keymap.set('n', '<leader>ec', ':RunCode<CR>', { noremap = true, silent = false })
 -- vim.keymap.set('n', '<leader>ef', ':RunFile<CR>', { noremap = true, silent = false })
@@ -912,7 +931,7 @@ require('lazy').setup({
 
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-        automatic_installation = false,
+        automatic_installation = true,
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
