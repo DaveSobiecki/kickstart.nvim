@@ -1,0 +1,23 @@
+name: Weekly Sync with Upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs every Sunday at midnight UTC
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-22.04  # Use a lightweight option like ubuntu-latest or consider alpine if available
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Sync with upstream
+        run: |
+          git remote add upstream https://github.com/nvim-lua/kickstart.nvim.git
+          git fetch upstream
+          git checkout main  # Adjust if your default branch is different
+          git merge upstream/main
+          git push origin main
