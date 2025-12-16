@@ -1,0 +1,1507 @@
+-- Set <space> as the leader key
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+-- Set to true if you have a Nerd Font installed
+vim.g.have_nerd_font = true
+
+-- [[ Setting options ]]
+vim.o.number = true
+vim.o.mouse = "a"
+vim.o.showmode = false
+vim.o.breakindent = true
+vim.o.undofile = true
+vim.o.ignorecase = true
+vim.o.smartcase = true
+vim.o.signcolumn = "yes"
+vim.o.updatetime = 250
+vim.o.timeoutlen = 300
+vim.o.splitright = true
+vim.o.splitbelow = true
+vim.o.list = true
+vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+vim.o.inccommand = "split"
+vim.o.cursorline = true
+vim.o.scrolloff = 10
+vim.o.confirm = true
+
+-- Sync clipboard with OS
+vim.schedule(function()
+	vim.o.clipboard = "unnamedplus"
+end)
+
+-- [[ Basic Keymaps ]]
+-- Clear highlights on search
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+
+-- Diagnostic keymaps
+vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+
+-- Terminal mode keymaps
+vim.keymap.set("t", "<esc><esc>", "<c-\\><c-n>")
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+-- Autocomplete mode toggle - Fixed keymap
+vim.keymap.set("n", "<leader>tm", ":CmpToggleDisplay<CR>", { desc = "Toggle nvim-cmp display mode" })
+
+-- Window navigation
+vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
+vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
+vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
+vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+
+-- Better scrolling
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+
+-- Custom keymaps
+vim.keymap.set(
+	"n",
+	"<Leader>;",
+	":NvimTreeFindFileToggle<CR>",
+	{ desc = "Toggle File tree", noremap = true, silent = true }
+)
+vim.keymap.set("n", "<Leader>o", ":OverseerToggle<CR>", { desc = "Toggle Overseer", noremap = true, silent = true })
+vim.keymap.set("n", "<Leader>r", ":OverseerRun<CR>", { desc = "Run Overseer Task", noremap = true, silent = true })
+vim.keymap.set("n", "<leader>tt", ":Floaterminal<CR>", { desc = "Toggle terminal window" })
+
+-- [[ Basic Autocommands ]]
+-- Highlight when yanking text
+vim.api.nvim_create_autocmd("TextYankPost", {
+	desc = "Highlight when yanking (copying) text",
+	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+	callback = function()
+		vim.hl.on_yank()
+	end,
+})
+
+-- [[ Install lazy.nvim plugin manager ]]
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+	if vim.v.shell_error ~= 0 then
+		error("Error cloning lazy.nvim:\n" .. out)
+	end
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- [[ Configure and install plugins ]]
+require("lazy").setup({
+	-- Detect tabstop and shiftwidth automatically
+	"NMAC427/guess-indent.nvim",
+
+	-- Comments plugin
+	"numToStr/Comment.nvim",
+
+	-- Git integration
+	{
+		"tpope/vim-fugitive",
+		lazy = true,
+		cmd = { "Git", "Gpush", "Gpull" },
+	},
+
+	-- Task runner
+	{
+		"stevearc/overseer.nvim",
+		opts = {},
+	},
+
+	-- Modern start screen
+	{
+		"nvimdev/dashboard-nvim",
+		event = "VimEnter",
+		opts = {
+			theme = "doom",
+			config = {
+				header = {
+					"",
+					"",
+					"███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗",
+					"████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║",
+					"██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║",
+					"██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║",
+					"██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║",
+					"╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚══╝  ╚═╝╚═╝     ╚═╝",
+					"",
+					"        🚀 Ready to code something amazing? 🚀        ",
+					"",
+				},
+				center = {
+					{ action = "Telescope find_files", desc = " Find File", icon = " ", key = "f" },
+					{ action = "ene | startinsert", desc = " New File", icon = " ", key = "n" },
+					{ action = "Telescope oldfiles", desc = " Recent Files", icon = " ", key = "r" },
+					{ action = "Telescope live_grep", desc = " Find Text", icon = " ", key = "t" },
+					{ action = "Lazy", desc = " Lazy", icon = "󰒲 ", key = "l" },
+					{ action = "qa", desc = " Quit", icon = " ", key = "q" },
+				},
+				footer = function()
+					local stats = require("lazy").stats()
+					local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+					return { "⚡ Neovim loaded " .. stats.loaded .. "/" .. stats.count .. " plugins in " .. ms .. "ms" }
+				end,
+			},
+		},
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+	},
+
+	-- Git signs
+	{
+		"lewis6991/gitsigns.nvim",
+		opts = {
+			signs = {
+				add = { text = "+" },
+				change = { text = "~" },
+				delete = { text = "_" },
+				topdelete = { text = "‾" },
+				changedelete = { text = "~" },
+			},
+		},
+	},
+
+	-- File tree
+	{
+		"nvim-tree/nvim-tree.lua",
+		version = "*",
+		lazy = false,
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		opts = {
+			filters = { custom = { "^.git$" } },
+			view = {
+				float = {
+					enable = true,
+					open_win_config = function()
+						local screen_w = vim.opt.columns:get()
+						local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+						local window_w = screen_w * 0.5
+						local window_h = screen_h * 0.8
+						local window_w_int = math.floor(window_w)
+						local window_h_int = math.floor(window_h)
+						local center_x = (screen_w - window_w) / 2
+						local center_y = ((vim.opt.lines:get() - window_h) / 2) - vim.opt.cmdheight:get()
+						return {
+							border = "rounded",
+							relative = "editor",
+							row = center_y,
+							col = center_x,
+							width = window_w_int,
+							height = window_h_int,
+						}
+					end,
+				},
+				width = function()
+					return math.floor(vim.opt.columns:get() * 0.5)
+				end,
+			},
+		},
+	},
+
+	-- Auto pairs
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		config = true,
+	},
+
+	-- Harpoon for file navigation
+	{
+		"ThePrimeagen/harpoon",
+		branch = "harpoon2",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			local harpoon = require("harpoon")
+			harpoon:setup()
+
+			-- Extension for highlighting current file
+			local harpoon_extensions = require("harpoon.extensions")
+			harpoon:extend(harpoon_extensions.builtins.highlight_current_file())
+
+			-- Telescope integration
+			local conf = require("telescope.config").values
+			local function toggle_telescope(harpoon_files)
+				local file_paths = {}
+				for _, item in ipairs(harpoon_files.items) do
+					table.insert(file_paths, item.value)
+				end
+				require("telescope.pickers")
+					.new({}, {
+						prompt_title = "Harpoon",
+						finder = require("telescope.finders").new_table({
+							results = file_paths,
+						}),
+						previewer = conf.file_previewer({}),
+						sorter = conf.generic_sorter({}),
+					})
+					:find()
+			end
+
+			-- Keymaps
+			vim.keymap.set("n", "<Leader>e", function()
+				toggle_telescope(harpoon:list())
+			end, { desc = "Open harpoon window" })
+
+			vim.keymap.set("n", "<leader>a", function()
+				harpoon:list():add()
+			end, { desc = "Add a file to harpoon" })
+
+			vim.keymap.set("n", "<C-e>", function()
+				harpoon.ui:toggle_quick_menu(harpoon:list())
+			end)
+
+			vim.keymap.set("n", "<leader>hp", function()
+				harpoon:list():prev()
+			end, { desc = "Go to previous harpoon file" })
+
+			vim.keymap.set("n", "<leader>hn", function()
+				harpoon:list():next()
+			end, { desc = "Go to next harpoon file" })
+
+			vim.keymap.set("n", "<leader>1", function()
+				harpoon:list():select(1)
+			end, { desc = "Harpoon file 1" })
+
+			vim.keymap.set("n", "<leader>2", function()
+				harpoon:list():select(2)
+			end, { desc = "Harpoon file 2" })
+
+			vim.keymap.set("n", "<leader>3", function()
+				harpoon:list():select(3)
+			end, { desc = "Harpoon file 3" })
+
+			vim.keymap.set("n", "<leader>4", function()
+				harpoon:list():select(4)
+			end, { desc = "Harpoon file 4" })
+		end,
+	},
+
+	-- Which-key for keymap hints
+	{
+		"folke/which-key.nvim",
+		event = "VimEnter",
+		opts = {
+			delay = 0,
+			icons = {
+				mappings = vim.g.have_nerd_font,
+				keys = vim.g.have_nerd_font and {} or {
+					Up = "<Up> ",
+					Down = "<Down> ",
+					Left = "<Left> ",
+					Right = "<Right> ",
+					C = "<C-…> ",
+					M = "<M-…> ",
+					D = "<D-…> ",
+					S = "<S-…> ",
+					CR = "<CR> ",
+					Esc = "<Esc> ",
+					ScrollWheelDown = "<ScrollWheelDown> ",
+					ScrollWheelUp = "<ScrollWheelUp> ",
+					NL = "<NL> ",
+					BS = "<BS> ",
+					Space = "<Space> ",
+					Tab = "<Tab> ",
+					F1 = "<F1>",
+					F2 = "<F2>",
+					F3 = "<F3>",
+					F4 = "<F4>",
+					F5 = "<F5>",
+					F6 = "<F6>",
+					F7 = "<F7>",
+					F8 = "<F8>",
+					F9 = "<F9>",
+					F10 = "<F10>",
+					F11 = "<F11>",
+					F12 = "<F12>",
+				},
+			},
+			spec = {
+				{ "<leader>s", group = "[S]earch" },
+				{ "<leader>t", group = "[T]oggle" },
+				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
+			},
+		},
+	},
+
+	-- Telescope fuzzy finder
+	{
+		"nvim-telescope/telescope.nvim",
+		event = "VimEnter",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			{
+				"nvim-telescope/telescope-fzf-native.nvim",
+				build = "make",
+				cond = function()
+					return vim.fn.executable("make") == 1
+				end,
+			},
+			{ "nvim-telescope/telescope-ui-select.nvim" },
+			{ "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
+		},
+		config = function()
+			require("telescope").setup({
+				defaults = {
+					file_ignore_patterns = { "node_modules", "target", ".git" },
+				},
+				pickers = {},
+				extensions = {
+					["ui-select"] = {
+						require("telescope.themes").get_dropdown(),
+					},
+				},
+			})
+
+			pcall(require("telescope").load_extension, "fzf")
+			pcall(require("telescope").load_extension, "ui-select")
+
+			local builtin = require("telescope.builtin")
+			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
+			vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
+			vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
+			vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
+			vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
+			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
+			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
+			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
+			vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+			vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
+
+			vim.keymap.set("n", "<leader>/", function()
+				builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
+					winblend = 10,
+					previewer = false,
+				}))
+			end, { desc = "[/] Fuzzily search in current buffer" })
+
+			vim.keymap.set("n", "<leader>s/", function()
+				builtin.live_grep({
+					grep_open_files = true,
+					prompt_title = "Live Grep in Open Files",
+				})
+			end, { desc = "[S]earch [/] in Open Files" })
+
+			vim.keymap.set("n", "<leader>sn", function()
+				builtin.find_files({ cwd = vim.fn.stdpath("config") })
+			end, { desc = "[S]earch [N]eovim files" })
+		end,
+	},
+
+	-- LSP Configuration
+	{
+		"folke/lazydev.nvim",
+		ft = "lua",
+		opts = {
+			library = {
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		},
+	},
+
+	{
+		"neovim/nvim-lspconfig",
+		dependencies = {
+			{ "williamboman/mason.nvim", opts = {} },
+			"williamboman/mason-lspconfig.nvim",
+			"WhoIsSethDaniel/mason-tool-installer.nvim",
+			{ "j-hui/fidget.nvim", opts = {} },
+		},
+		config = function()
+			vim.api.nvim_create_autocmd("LspAttach", {
+				group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
+				callback = function(event)
+					local map = function(keys, func, desc, mode)
+						mode = mode or "n"
+						vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
+					end
+
+					map("grn", vim.lsp.buf.rename, "[R]e[n]ame")
+					map("gra", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
+					map("grr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+					map("gri", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
+					map("grd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+					map("grD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+					map("gO", require("telescope.builtin").lsp_document_symbols, "Open Document Symbols")
+					map("gW", require("telescope.builtin").lsp_dynamic_workspace_symbols, "Open Workspace Symbols")
+					map("grt", require("telescope.builtin").lsp_type_definitions, "[G]oto [T]ype Definition")
+
+					local client = vim.lsp.get_client_by_id(event.data.client_id)
+					if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+						local highlight_augroup =
+							vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
+						vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+							buffer = event.buf,
+							group = highlight_augroup,
+							callback = vim.lsp.buf.document_highlight,
+						})
+
+						vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+							buffer = event.buf,
+							group = highlight_augroup,
+							callback = vim.lsp.buf.clear_references,
+						})
+
+						vim.api.nvim_create_autocmd("LspDetach", {
+							group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true }),
+							callback = function(event2)
+								vim.lsp.buf.clear_references()
+								vim.api.nvim_clear_autocmds({ group = "kickstart-lsp-highlight", buffer = event2.buf })
+							end,
+						})
+					end
+
+					if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+						map("<leader>th", function()
+							vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
+						end, "[T]oggle Inlay [H]ints")
+					end
+				end,
+			})
+
+			vim.diagnostic.config({
+				severity_sort = true,
+				float = { border = "rounded", source = "if_many" },
+				underline = { severity = vim.diagnostic.severity.ERROR },
+				signs = vim.g.have_nerd_font and {
+					text = {
+						[vim.diagnostic.severity.ERROR] = "󰅚 ",
+						[vim.diagnostic.severity.WARN] = "󰀪 ",
+						[vim.diagnostic.severity.INFO] = "󰋽 ",
+						[vim.diagnostic.severity.HINT] = "󰌶 ",
+					},
+				} or {},
+				virtual_text = {
+					source = "if_many",
+					spacing = 2,
+				},
+			})
+
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+			local servers = {
+				lua_ls = {
+					settings = {
+						Lua = {
+							completion = { callSnippet = "Replace" },
+						},
+					},
+				},
+			}
+
+			local ensure_installed = vim.tbl_keys(servers or {})
+			vim.list_extend(ensure_installed, { "stylua" })
+
+			require("mason-tool-installer").setup({
+				ensure_installed = ensure_installed,
+				auto_update = false,
+				run_on_start = true,
+			})
+
+			require("mason-lspconfig").setup({
+				ensure_installed = vim.tbl_keys(servers),
+				automatic_installation = false,
+				handlers = {
+					function(server_name)
+						local server_opts = servers[server_name] or {}
+						server_opts.capabilities =
+							vim.tbl_deep_extend("force", {}, capabilities, server_opts.capabilities or {})
+						require("lspconfig")[server_name].setup(server_opts)
+					end,
+				},
+			})
+		end,
+	},
+
+	-- Debugger (DAP) Configuration
+	{
+		"mfussenegger/nvim-dap",
+		dependencies = {
+			-- Optional: UI for DAP
+			{
+				"rcarriga/nvim-dap-ui",
+				dependencies = { "nvim-neotest/nvim-nio" },
+			},
+			-- Optional: Helper for Mason to configure DAP adapters
+			"williamboman/mason-nvim-dap.nvim",
+		},
+		config = function()
+			local dap = require("dap")
+			local dapui = require("dapui")
+
+			-- Configure Mason to setup DAP adapters
+			require("mason-nvim-dap").setup({
+				ensure_installed = { "codelldb" },
+				automatic_installation = true,
+			})
+
+			-- Konfiguracja adaptera CodeLLDB
+			dap.adapters.codelldb = {
+				type = "server",
+				port = "${port}",
+				executable = {
+					command = vim.fn.stdpath("data") .. "/mason/bin/codelldb.cmd",
+					args = { "--port", "${port}" },
+				},
+			}
+
+			-- Konfiguracja debugowania dla Rust
+			dap.configurations.rust = {
+				{
+					name = "Launch file",
+					type = "codelldb",
+					request = "launch",
+					program = function()
+						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/target/debug/", "file")
+					end,
+					cwd = "${workspaceFolder}",
+					stopOnEntry = true,
+				},
+			}
+
+			-- Konfiguracja nvim-dap-ui
+			dapui.setup({
+				layouts = {
+					{
+						elements = {
+							{ id = "scopes", size = 0.25 },
+							{ id = "breakpoints", size = 0.25 },
+							{ id = "stacks", size = 0.25 },
+							{ id = "watches", size = 0.25 },
+						},
+						size = 40,
+						position = "left",
+					},
+					{
+						elements = {
+							{ id = "repl", size = 0.5 },
+							{ id = "console", size = 0.5 },
+						},
+						size = 0.3,
+						position = "bottom",
+					},
+				},
+				floating = {
+					max_height = nil,
+					max_width = nil,
+					border = "rounded",
+					mappings = {
+						close = { "q", "<Esc>" },
+					},
+				},
+			})
+
+			-- Auto-otwieranie/zamykanie nvim-dap-ui
+			dap.listeners.before.attach.dapui_config = function()
+				dapui.open()
+			end
+			dap.listeners.before.launch.dapui_config = function()
+				dapui.open()
+			end
+			dap.listeners.before.event_terminated.dapui_config = function()
+				dapui.close()
+			end
+			dap.listeners.before.event_exited.dapui_config = function()
+				dapui.close()
+			end
+
+			-- Debug keymaps
+			vim.keymap.set("n", "<F5>", function()
+				dap.continue()
+			end, { desc = "DAP: Continue" })
+			vim.keymap.set("n", "<F9>", function()
+				dap.toggle_breakpoint()
+			end, { desc = "DAP: Toggle Breakpoint" })
+			vim.keymap.set("n", "<F10>", function()
+				dap.step_over()
+			end, { desc = "DAP: Step Over" })
+			vim.keymap.set("n", "<F11>", function()
+				dap.step_into()
+			end, { desc = "DAP: Step Into" })
+			vim.keymap.set("n", "<F12>", function()
+				dap.step_out()
+			end, { desc = "DAP: Step Out" })
+			vim.keymap.set("n", "<leader>dr", function()
+				dap.repl.toggle()
+			end, { desc = "DAP: Toggle REPL" })
+			vim.keymap.set("n", "<leader>du", function()
+				dapui.toggle()
+			end, { desc = "DAP UI: Toggle" })
+			vim.keymap.set("n", "<leader>dx", function()
+				dap.terminate()
+			end, { desc = "DAP: Terminate" })
+			vim.keymap.set("n", "<leader>do", function()
+				dap.continue()
+			end, { desc = "DAP: List Debuggers" })
+		end,
+	},
+
+	-- Rust support with rustaceanvim
+	{
+		"mrcjkb/rustaceanvim",
+		version = "^5",
+		lazy = false,
+		ft = { "rust" },
+		config = function()
+			vim.g.rustaceanvim = {
+				tools = {
+					executor = require("rustaceanvim.executors").overseer,
+					on_initialized = function()
+						vim.api.nvim_create_autocmd("BufWritePost", {
+							pattern = "*.rs",
+							group = vim.api.nvim_create_augroup("RustaceanClippy", { clear = true }),
+							callback = function() end,
+						})
+					end,
+				},
+				server = {
+					capabilities = require("cmp_nvim_lsp").default_capabilities(),
+					on_attach = function(client, bufnr)
+						vim.keymap.set("n", "<leader>ca", "<cmd>RustLsp codeAction<cr>", {
+							buffer = bufnr,
+							desc = "Code Action (Rust)",
+						})
+						vim.keymap.set("n", "<leader>dr", "<cmd>RustLsp debuggables<cr>", {
+							buffer = bufnr,
+							desc = "Debug Rust",
+						})
+						vim.keymap.set("n", "<leader>rr", "<cmd>RustLsp runnables<cr>", {
+							buffer = bufnr,
+							desc = "Run Rust",
+						})
+						vim.keymap.set("n", "<leader>rt", "<cmd>RustLsp testables<cr>", {
+							buffer = bufnr,
+							desc = "Test Rust",
+						})
+					end,
+					default_settings = {
+						["rust-analyzer"] = {
+							cargo = {
+								allFeatures = true,
+								loadOutDirsFromCheck = true,
+								buildScripts = {
+									enable = true,
+								},
+							},
+							checkOnSave = true,
+							check = {
+								allFeatures = true,
+							},
+							procMacro = {
+								enable = true,
+								ignored = {
+									["async-trait"] = { "async_trait" },
+									["napi-derive"] = { "napi" },
+									["async-recursion"] = { "async_recursion" },
+								},
+							},
+						},
+					},
+				},
+			}
+		end,
+	},
+
+	-- Formatting
+	{
+		"stevearc/conform.nvim",
+		event = { "BufWritePre" },
+		cmd = { "ConformInfo" },
+		keys = {
+			{
+				"<leader>f",
+				function()
+					require("conform").format({ async = true, lsp_format = "fallback" })
+				end,
+				mode = "",
+				desc = "[F]ormat buffer",
+			},
+		},
+		opts = {
+			notify_on_error = false,
+			format_on_save = function(bufnr)
+				local disable_filetypes = {}
+				if disable_filetypes[vim.bo[bufnr].filetype] then
+					return nil
+				else
+					return {
+						timeout_ms = 500,
+						lsp_format = "fallback",
+					}
+				end
+			end,
+			formatters_by_ft = {
+				lua = { "stylua" },
+				rust = { "rustfmt" },
+			},
+		},
+	},
+
+	-- nvim-cmp completion
+	-- Enhanced nvim-cmp configuration with true inline completion toggle
+	{
+		"hrsh7th/nvim-cmp",
+		event = "InsertEnter",
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-buffer",
+			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-cmdline",
+			"saadparwaiz1/cmp_luasnip",
+			"L3MON4D3/LuaSnip",
+			"rafamadriz/friendly-snippets",
+			"onsails/lspkind.nvim",
+		},
+		config = function()
+			local cmp = require("cmp")
+			local luasnip = require("luasnip")
+			local lspkind = require("lspkind")
+
+			-- Global state for completion mode
+			local completion_state = {
+				mode = "full", -- "full" or "inline"
+				ns_id = vim.api.nvim_create_namespace("cmp_inline"),
+				current_completion = nil,
+				completion_items = {},
+				selected_index = 1,
+				timer = nil,
+			}
+
+			-- Helper function for backspace check
+			local function check_backspace()
+				local col = vim.fn.col(".") - 1
+				return col == 0 or vim.fn.getline("."):sub(col, col):match("%s")
+			end
+
+			-- Clear inline completion
+			local function clear_inline_completion()
+				if completion_state.timer then
+					completion_state.timer:stop()
+					completion_state.timer:close()
+					completion_state.timer = nil
+				end
+
+				pcall(vim.api.nvim_buf_clear_namespace, 0, completion_state.ns_id, 0, -1)
+				completion_state.current_completion = nil
+				completion_state.completion_items = {}
+				completion_state.selected_index = 1
+			end
+
+			-- Get current word being typed
+			local function get_current_word()
+				local line = vim.api.nvim_get_current_line()
+				local col = vim.api.nvim_win_get_cursor(0)[2]
+				local before_cursor = string.sub(line, 1, col)
+
+				-- Find word boundary
+				local word_start = 1
+				for i = col, 1, -1 do
+					local char = string.sub(before_cursor, i, i)
+					if not string.match(char, "[%w_]") then
+						word_start = i + 1
+						break
+					end
+				end
+
+				return string.sub(before_cursor, word_start, col), word_start - 1
+			end
+
+			-- Show inline completion
+			local function show_inline_completion()
+				if completion_state.mode ~= "inline" then
+					return
+				end
+
+				clear_inline_completion()
+
+				local current_word, word_start_col = get_current_word()
+				if #current_word == 0 then
+					return
+				end
+
+				completion_state.timer = vim.loop.new_timer()
+				completion_state.timer:start(
+					150,
+					0,
+					vim.schedule_wrap(function()
+						local params = vim.lsp.util.make_position_params()
+						params.context = {
+							triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
+						}
+
+						vim.lsp.buf_request(0, "textDocument/completion", params, function(_, result)
+							if not result or not result.items or #result.items == 0 then
+								return
+							end
+
+							local filtered_items = {}
+							for _, item in ipairs(result.items) do
+								if item.label and vim.startswith(item.label:lower(), current_word:lower()) then
+									table.insert(filtered_items, item)
+								end
+							end
+
+							if #filtered_items == 0 then
+								return
+							end
+
+							completion_state.completion_items = filtered_items
+							local selected_item = filtered_items[completion_state.selected_index] or filtered_items[1]
+							local label = selected_item.label
+							local insert_text = selected_item.insertText or label
+
+							local remaining_text = label:sub(#current_word + 1)
+							if #remaining_text > 0 then
+								local display_text = remaining_text .. "  " .. label
+
+								local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+								local col = vim.api.nvim_win_get_cursor(0)[2]
+
+								pcall(vim.api.nvim_buf_set_extmark, 0, completion_state.ns_id, row, col, {
+									virt_text = { { display_text, "Comment" } },
+									virt_text_pos = "inline",
+									priority = 100,
+								})
+
+								completion_state.current_completion = {
+									text = insert_text,
+									remaining = remaining_text,
+									word_start = word_start_col,
+									current_word = current_word,
+								}
+							end
+						end)
+
+						completion_state.timer:close()
+						completion_state.timer = nil
+					end)
+				)
+			end
+
+			-- Accept inline completion
+			local function accept_inline_completion()
+				if completion_state.mode == "inline" and completion_state.current_completion then
+					local completion = completion_state.current_completion
+
+					-- Schedule the buffer modification to avoid E565 error
+					vim.schedule(function()
+						local pos = vim.api.nvim_win_get_cursor(0)
+						local line = vim.api.nvim_get_current_line()
+
+						-- Replace the current word with the full completion
+						local before = string.sub(line, 1, completion.word_start)
+						local after = string.sub(line, pos[2] + 1)
+						local new_line = before .. completion.text .. after
+
+						vim.api.nvim_set_current_line(new_line)
+						vim.api.nvim_win_set_cursor(0, { pos[1], completion.word_start + #completion.text })
+					end)
+
+					clear_inline_completion()
+					return true
+				end
+				return false
+			end
+
+			-- Cycle through inline completions
+			local function cycle_inline_completion(direction)
+				if completion_state.mode == "inline" and #completion_state.completion_items > 0 then
+					if direction > 0 then
+						completion_state.selected_index = completion_state.selected_index + 1
+						if completion_state.selected_index > #completion_state.completion_items then
+							completion_state.selected_index = 1
+						end
+					else
+						completion_state.selected_index = completion_state.selected_index - 1
+						if completion_state.selected_index < 1 then
+							completion_state.selected_index = #completion_state.completion_items
+						end
+					end
+
+					-- Update display
+					show_inline_completion()
+					return true
+				end
+				return false
+			end
+
+			-- Base CMP configuration
+			local base_config = {
+				snippet = {
+					expand = function(args)
+						luasnip.lsp_expand(args.body)
+					end,
+				},
+				sources = cmp.config.sources({
+					{ name = "nvim_lsp" },
+					{ name = "luasnip" },
+					{ name = "buffer" },
+					{ name = "path" },
+				}),
+				window = {
+					completion = cmp.config.window.bordered(),
+					documentation = cmp.config.window.bordered({
+						side = "right",
+						anchor = "cursor",
+						max_width = 80,
+						max_height = 15,
+					}),
+				},
+				formatting = {
+					format = lspkind.cmp_format({
+						with_text = true,
+						maxwidth = 50,
+						ellipsis_char = "...",
+					}),
+				},
+			}
+
+			-- Full mode configuration
+			local full_mode_config = vim.tbl_deep_extend("force", base_config, {
+				completion = {
+					completeopt = "menu,menuone,noinsert",
+				},
+				mapping = cmp.mapping.preset.insert({
+					["<C-b>"] = cmp.mapping.scroll_docs(-4),
+					["<C-f>"] = cmp.mapping.scroll_docs(4),
+					["<C-Space>"] = cmp.mapping.complete(),
+					["<C-e>"] = cmp.mapping.abort(),
+
+					["<TAB>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_next_item()
+						elseif luasnip.expand_or_jumpable() then
+							luasnip.expand_or_jump()
+						elseif check_backspace() then
+							fallback()
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+
+					["<S-TAB>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_prev_item()
+						elseif luasnip.jumpable(-1) then
+							luasnip.jump(-1)
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+
+					["<CR>"] = cmp.mapping.confirm({ select = true }),
+				}),
+			})
+
+			-- Inline mode configuration (minimal CMP setup)
+			local inline_mode_config = vim.tbl_deep_extend("force", base_config, {
+				completion = {
+					autocomplete = false,
+				},
+				mapping = {
+					-- Disable all CMP mappings in inline mode
+					["<C-Space>"] = cmp.mapping.complete(),
+					["<C-e>"] = cmp.mapping.abort(),
+				},
+			})
+
+			-- Setup autocommands for inline mode
+			local inline_group = vim.api.nvim_create_augroup("CmpInlineMode", { clear = true })
+
+			local function setup_inline_autocmds()
+				vim.api.nvim_clear_autocmds({ group = inline_group })
+
+				vim.api.nvim_create_autocmd({ "TextChangedI" }, {
+					group = inline_group,
+					callback = function()
+						if completion_state.mode == "inline" then
+							show_inline_completion()
+						end
+					end,
+				})
+
+				vim.api.nvim_create_autocmd({ "InsertLeave", "BufLeave" }, {
+					group = inline_group,
+					callback = clear_inline_completion,
+				})
+			end
+
+			-- Custom key handlers for inline mode
+			local function setup_inline_keymaps()
+				-- TAB handler
+				vim.keymap.set("i", "<TAB>", function()
+					if completion_state.mode == "inline" then
+						if completion_state.current_completion then
+							accept_inline_completion()
+							return "" -- Don't insert anything immediately
+						elseif not cycle_inline_completion(1) then
+							return "<TAB>"
+						end
+						return "" -- Don't insert tab if we cycled
+					else
+						-- Let CMP handle it in full mode
+						return "<TAB>"
+					end
+				end, { expr = true, replace_keycodes = true, buffer = true })
+
+				-- Shift-TAB handler
+				vim.keymap.set("i", "<S-TAB>", function()
+					if completion_state.mode == "inline" then
+						if not cycle_inline_completion(-1) then
+							return "<S-TAB>"
+						end
+						return "" -- Don't insert anything if we cycled
+					else
+						return "<S-TAB>"
+					end
+				end, { expr = true, replace_keycodes = true, buffer = true })
+
+				-- Enter handler
+				vim.keymap.set("i", "<CR>", function()
+					if completion_state.mode == "inline" and completion_state.current_completion then
+						accept_inline_completion()
+						return "" -- Don't insert newline
+					else
+						return "<CR>"
+					end
+				end, { expr = true, replace_keycodes = true, buffer = true })
+
+				-- Escape handler
+				vim.keymap.set("i", "<Esc>", function()
+					if completion_state.mode == "inline" then
+						clear_inline_completion()
+					end
+					return "<Esc>"
+				end, { expr = true, replace_keycodes = true, buffer = true })
+			end
+
+			-- Toggle function
+			local function toggle_completion_mode()
+				clear_inline_completion()
+
+				if completion_state.mode == "full" then
+					-- Switch to inline mode
+					completion_state.mode = "inline"
+					cmp.setup(inline_mode_config)
+					setup_inline_autocmds()
+					setup_inline_keymaps()
+					vim.o.completeopt = "menuone,noselect"
+					print("🔄 Completion: Inline mode (Ghost text)")
+				else
+					-- Switch to full mode
+					completion_state.mode = "full"
+					vim.api.nvim_clear_autocmds({ group = inline_group })
+					cmp.setup(full_mode_config)
+					vim.o.completeopt = "menu,menuone,noinsert"
+
+					-- Clear inline mode keymaps
+					pcall(vim.keymap.del, "i", "<TAB>", { buffer = true })
+					pcall(vim.keymap.del, "i", "<S-TAB>", { buffer = true })
+					pcall(vim.keymap.del, "i", "<CR>", { buffer = true })
+					pcall(vim.keymap.del, "i", "<Esc>", { buffer = true })
+
+					print("🔄 Completion: Full mode (Popup menu)")
+				end
+			end
+
+			-- Initialize with full mode
+			vim.o.completeopt = "menu,menuone,noinsert"
+			cmp.setup(full_mode_config)
+
+			-- Cmdline completion (always enabled)
+			cmp.setup.cmdline(":", {
+				mapping = cmp.mapping.preset.cmdline(),
+				sources = cmp.config.sources({
+					{ name = "cmdline" },
+				}),
+			})
+
+			cmp.setup.cmdline("/", {
+				mapping = cmp.mapping.preset.cmdline(),
+				sources = cmp.config.sources({
+					{ name = "buffer" },
+				}),
+			})
+
+			-- Load friendly snippets
+			require("luasnip.loaders.from_vscode").lazy_load()
+
+			-- Create the toggle command
+			vim.api.nvim_create_user_command("CmpToggleDisplay", toggle_completion_mode, {
+				desc = "Toggle between full and inline completion modes",
+			})
+
+			-- Auto-setup inline keymaps when entering insert mode
+			vim.api.nvim_create_autocmd("InsertEnter", {
+				callback = function()
+					if completion_state.mode == "inline" then
+						setup_inline_keymaps()
+					end
+				end,
+			})
+		end,
+	},
+
+	-- Colorscheme
+	{
+    "skylarmb/torchlight.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      contrast = "hard", -- possible values: soft, medium, hard, stark
+    },
+  },
+	-- Todo comments
+	{
+		"folke/todo-comments.nvim",
+		event = "VimEnter",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		opts = { signs = false },
+	},
+
+	-- Mini plugins collection
+	{
+		"echasnovski/mini.nvim",
+		config = function()
+			require("mini.ai").setup({ n_lines = 500 })
+			require("mini.surround").setup()
+
+			local statusline = require("mini.statusline")
+			statusline.setup({ use_icons = vim.g.have_nerd_font })
+			statusline.section_location = function()
+				return "%2l:%-2v"
+			end
+		end,
+	},
+
+	-- Treesitter
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		main = "nvim-treesitter.configs",
+		opts = {
+			ensure_installed = {
+				"bash",
+				"diff",
+				"html",
+				"lua",
+				"luadoc",
+				"markdown",
+				"markdown_inline",
+				"query",
+				"vim",
+				"vimdoc",
+				"rust",
+				"toml",
+			},
+			auto_install = true,
+			highlight = {
+				enable = true,
+				additional_vim_regex_highlighting = { "ruby" },
+			},
+			indent = { enable = true, disable = { "ruby" } },
+		},
+		config = function(plugin, opts)
+			require("nvim-treesitter.install").compilers = { "clang" }
+			require("nvim-treesitter.install").prefer_git = false
+			require("nvim-treesitter.configs").setup(opts)
+		end,
+	},
+}, {
+	ui = {
+		icons = vim.g.have_nerd_font and {} or {
+			cmd = "⌘",
+			config = "🛠",
+			event = "📅",
+			ft = "📂",
+			init = "⚙",
+			keys = "🗝",
+			plugin = "🔌",
+			runtime = "💻",
+			require = "🌙",
+			source = "📄",
+			start = "🚀",
+			task = "📌",
+			lazy = "💤 ",
+		},
+	},
+})
+
+-- [[ Additional Configuration ]]
+
+-- Disable netrw
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- Setup Comment plugin
+require("Comment").setup()
+
+-- [[ Floating Terminal Configuration ]]
+local state = {
+	floating = {
+		buf = -1,
+		win = -1,
+	},
+}
+
+local function create_floating_window(opts)
+	opts = opts or {}
+	local width = opts.width or math.floor(vim.o.columns * 0.8)
+	local height = opts.height or math.floor(vim.o.lines * 0.8)
+
+	local col = math.floor((vim.o.columns - width) / 2)
+	local row = math.floor((vim.o.lines - height) / 2)
+
+	local buf = nil
+	if vim.api.nvim_buf_is_valid(opts.buf) then
+		buf = opts.buf
+	else
+		buf = vim.api.nvim_create_buf(false, true)
+	end
+
+	local win_config = {
+		relative = "editor",
+		width = width,
+		height = height,
+		col = col,
+		row = row,
+		style = "minimal",
+		border = "rounded",
+	}
+
+	local win = vim.api.nvim_open_win(buf, true, win_config)
+	return { buf = buf, win = win }
+end
+
+local toggle_terminal = function()
+	if not vim.api.nvim_win_is_valid(state.floating.win) then
+		state.floating = create_floating_window({ buf = state.floating.buf })
+		if vim.bo[state.floating.buf].buftype ~= "terminal" then
+			vim.cmd.terminal()
+		end
+	else
+		vim.api.nvim_win_hide(state.floating.win)
+	end
+end
+
+vim.api.nvim_create_user_command("Floaterminal", toggle_terminal, {})
+
+-- [[ nvim-cmp Toggle Functionality ]]
+local cmp_display_mode = "full" -- Track current mode
+
+vim.api.nvim_create_user_command("CmpToggleDisplay", function()
+	local cmp = require("cmp")
+	local luasnip = require("luasnip")
+	local lspkind = require("lspkind")
+
+	-- Helper function for backspace check
+	local function check_backspace()
+		local col = vim.fn.col(".") - 1
+		return col == 0 or vim.fn.getline("."):sub(col, col):match("%s")
+	end
+
+	if cmp_display_mode == "full" then
+		-- Switch to inline mode
+		cmp_display_mode = "inline"
+		vim.o.completeopt = "menuone,noselect,noinsert"
+
+		cmp.setup({
+			completion = {
+				completeopt = "menuone,noselect,noinsert",
+			},
+			snippet = {
+				expand = function(args)
+					luasnip.lsp_expand(args.body)
+				end,
+			},
+			mapping = cmp.mapping.preset.insert({
+				["<C-b>"] = cmp.mapping.scroll_docs(-4),
+				["<C-f>"] = cmp.mapping.scroll_docs(4),
+				["<C-Space>"] = cmp.mapping.complete(),
+				["<C-e>"] = cmp.mapping.abort(),
+				["<TAB>"] = cmp.mapping(function(fallback)
+					if cmp.visible() then
+						cmp.select_next_item()
+					elseif luasnip.expand_or_jumpable() then
+						luasnip.expand_or_jump()
+					elseif check_backspace() then
+						fallback()
+					else
+						fallback()
+					end
+				end, { "i", "s" }),
+				["<S-TAB>"] = cmp.mapping(function(fallback)
+					if cmp.visible() then
+						cmp.select_prev_item()
+					elseif luasnip.jumpable(-1) then
+						luasnip.jump(-1)
+					else
+						fallback()
+					end
+				end, { "i", "s" }),
+				-- Inline mode: only confirm when explicitly selected
+				["<CR>"] = cmp.mapping.confirm({ select = false }),
+			}),
+			sources = cmp.config.sources({
+				{ name = "nvim_lsp" },
+				{ name = "luasnip" },
+				{ name = "buffer" },
+				{ name = "path" },
+			}),
+			window = {
+				completion = cmp.config.window.bordered(),
+				documentation = cmp.config.window.bordered({
+					side = "right",
+					anchor = "cursor",
+					max_width = 80,
+					max_height = 15,
+				}),
+			},
+			formatting = {
+				format = lspkind.cmp_format({
+					with_text = true,
+					maxwidth = 50,
+					ellipsis_char = "...",
+				}),
+			},
+		})
+
+		print("🔄 Nvim-cmp: Inline mode - Manual selection required")
+	else
+		-- Switch to full mode
+		cmp_display_mode = "full"
+		vim.o.completeopt = "menu,menuone,noinsert"
+
+		cmp.setup({
+			completion = {
+				completeopt = "menu,menuone,noinsert",
+			},
+			snippet = {
+				expand = function(args)
+					luasnip.lsp_expand(args.body)
+				end,
+			},
+			mapping = cmp.mapping.preset.insert({
+				["<C-b>"] = cmp.mapping.scroll_docs(-4),
+				["<C-f>"] = cmp.mapping.scroll_docs(4),
+				["<C-Space>"] = cmp.mapping.complete(),
+				["<C-e>"] = cmp.mapping.abort(),
+				["<TAB>"] = cmp.mapping(function(fallback)
+					if cmp.visible() then
+						cmp.select_next_item()
+					elseif luasnip.expand_or_jumpable() then
+						luasnip.expand_or_jump()
+					elseif check_backspace() then
+						fallback()
+					else
+						fallback()
+					end
+				end, { "i", "s" }),
+				["<S-TAB>"] = cmp.mapping(function(fallback)
+					if cmp.visible() then
+						cmp.select_prev_item()
+					elseif luasnip.jumpable(-1) then
+						luasnip.jump(-1)
+					else
+						fallback()
+					end
+				end, { "i", "s" }),
+				-- Full mode: auto-confirm first item
+				["<CR>"] = cmp.mapping.confirm({ select = true }),
+			}),
+			sources = cmp.config.sources({
+				{ name = "nvim_lsp" },
+				{ name = "luasnip" },
+				{ name = "buffer" },
+				{ name = "path" },
+			}),
+			window = {
+				completion = cmp.config.window.bordered(),
+				documentation = cmp.config.window.bordered({
+					side = "right",
+					anchor = "cursor",
+					max_width = 80,
+					max_height = 15,
+				}),
+			},
+			formatting = {
+				format = lspkind.cmp_format({
+					with_text = true,
+					maxwidth = 50,
+					ellipsis_char = "...",
+				}),
+			},
+		})
+
+		print("🔄 Nvim-cmp: Full mode - Auto-select first item")
+	end
+
+	-- Update cmdline configurations
+	cmp.setup.cmdline(":", {
+		mapping = cmp.mapping.preset.cmdline(),
+		sources = cmp.config.sources({
+			{ name = "cmdline" },
+		}),
+		completion = { completeopt = vim.o.completeopt },
+	})
+
+	cmp.setup.cmdline("/", {
+		mapping = cmp.mapping.preset.cmdline(),
+		sources = cmp.config.sources({
+			{ name = "buffer" },
+		}),
+		completion = { completeopt = vim.o.completeopt },
+	})
+end, { desc = "Toggle nvim-cmp display mode" })
+
+-- [[ Auto-resize nvim-tree ]]
+vim.api.nvim_create_autocmd({ "VimResized" }, {
+	desc = "Resize nvim-tree if nvim window got resized",
+	group = vim.api.nvim_create_augroup("NvimTreeResize", { clear = true }),
+	callback = function()
+		local percentage = 15
+		local ratio = percentage / 100
+		local width = math.floor(vim.go.columns * ratio)
+		vim.cmd("tabdo NvimTreeResize " .. width)
+	end,
+})
+
+-- [[ LSP Quickfix Function ]]
+local function quickfix()
+	vim.lsp.buf.code_action({
+		filter = function(a)
+			return a.isPreferred
+		end,
+		apply = true,
+	})
+end
+
+vim.keymap.set("n", "<leader>af", quickfix, {
+	noremap = true,
+	silent = true,
+	desc = "Apply suggested quickfix",
+})
+
+-- [[ File Type Settings ]]
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "rust", "toml", "lua", "txt" },
+	callback = function()
+		vim.bo.tabstop = 4
+		vim.bo.shiftwidth = 4
+		vim.bo.softtabstop = 4
+		vim.bo.expandtab = true
+	end,
+})
+
+-- [[ Rust-specific autocommands ]]
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "rust",
+	callback = function()
+		-- Auto-format on save for Rust files
+		vim.api.nvim_create_autocmd("BufWritePre", {
+			buffer = 0,
+			callback = function()
+				vim.lsp.buf.format({ async = false })
+			end,
+		})
+	end,
+})
+
+-- vim: ts=2 sts=2 sw=2 et
