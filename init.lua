@@ -164,7 +164,7 @@ require('lazy').setup({
           { action = 'ene | startinsert', desc = ' New File', icon = ' ', key = 'n' },
           { action = 'Telescope oldfiles', desc = ' Recent Files', icon = ' ', key = 'r' },
           { action = 'Telescope live_grep', desc = ' Find Text', icon = ' ', key = 't' },
-          { action = 'Lazy', desc = 'Lazy', icon = ' ', key = 'l' },
+          { action = 'Lazy', desc = ' Lazy', icon = ' ', key = 'l' },
           { action = 'qa', desc = ' Quit', icon = ' ', key = 'q' },
         },
         footer = function()
@@ -403,7 +403,7 @@ require('lazy').setup({
               if c_project == '' then
                 return ''
               end
-              return '🔨 ' .. c_project
+              return '[CMake: ' .. c_project .. ']'
             end,
           },
         },
@@ -617,6 +617,9 @@ require('lazy').setup({
             )(fname)
           end,
         },
+        glsl_analyzer = {
+          filetypes = { 'glsl', 'vert', 'frag', 'geom', 'comp', 'tesc', 'tese', 'mesh', 'task', 'rgen', 'rchit', 'rmiss' },
+        },
         lua_ls = {
           settings = {
             Lua = {
@@ -634,6 +637,7 @@ require('lazy').setup({
         'stylua',
         'clang-format',
         'codelldb',
+        'glsl_analyzer',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -758,7 +762,26 @@ require('lazy').setup({
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs',
     opts = {
-      ensure_installed = { 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'cmake' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'cpp',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        'cmake',
+        'glsl', -- Shader support
+        'hlsl', -- DirectX shaders
+        'json',
+        'yaml',
+        'toml',
+      },
       auto_install = true,
       highlight = {
         enable = true,
@@ -768,25 +791,152 @@ require('lazy').setup({
     },
   },
 
+  -- GLSL/Shader support
+  {
+    'tikhomirov/vim-glsl',
+    ft = { 'glsl', 'vert', 'frag', 'geom', 'comp', 'tesc', 'tese' },
+  },
+
+  -- Enhanced which-key for better discoverability
+  {
+    'folke/which-key.nvim',
+    event = 'VeryLazy',
+    opts = function()
+      return {
+        preset = 'modern',
+        delay = 200,
+        icons = {
+          mappings = vim.g.have_nerd_font,
+        },
+        spec = {
+          -- File operations
+          { '<leader>f', desc = 'Format buffer' },
+          { '<leader>;', desc = 'Toggle file tree' },
+          { '<leader>e', desc = 'Harpoon telescope' },
+          { '<leader>a', desc = 'Add to harpoon' },
+
+          -- CMake group with detailed descriptions
+          { '<leader>c', group = 'CMake' },
+          { '<leader>cg', desc = 'Generate build files (Clang+Ninja)' },
+          { '<leader>cb', desc = 'Build project' },
+          { '<leader>cr', desc = 'Run executable' },
+          { '<leader>cd', desc = 'Debug with codelldb' },
+          { '<leader>cs', desc = 'Select build type (Debug/Release)' },
+          { '<leader>ct', desc = 'Select build target' },
+
+          -- Debug group
+          { '<leader>d', group = 'Debug' },
+          { '<leader>b', desc = 'Toggle breakpoint' },
+          { '<leader>B', desc = 'Conditional breakpoint' },
+          { '<leader>dr', desc = 'Open debug REPL' },
+          { '<leader>dl', desc = 'Run last debug config' },
+          { '<leader>dh', desc = 'Hover variable info', mode = { 'n', 'v' } },
+          { '<leader>dp', desc = 'Preview value', mode = { 'n', 'v' } },
+          { '<leader>dt', desc = 'Terminate debug session' },
+
+          -- Search group
+          { '<leader>s', group = 'Search' },
+          { '<leader>sh', desc = 'Search help tags' },
+          { '<leader>sk', desc = 'Search keymaps' },
+          { '<leader>sf', desc = 'Search files' },
+          { '<leader>ss', desc = 'Select telescope picker' },
+          { '<leader>sw', desc = 'Search current word' },
+          { '<leader>sg', desc = 'Live grep (search text)' },
+          { '<leader>sd', desc = 'Search diagnostics' },
+          { '<leader>sr', desc = 'Resume last search' },
+          { '<leader>s.', desc = 'Recent files' },
+          { '<leader>s/', desc = 'Search in open files' },
+          { '<leader>sn', desc = 'Search Neovim config files' },
+          { '<leader>/', desc = 'Fuzzy search current buffer' },
+          { '<leader><leader>', desc = 'Find open buffers' },
+
+          -- Toggle group
+          { '<leader>t', group = 'Toggle' },
+          { '<leader>th', desc = 'Toggle inlay hints' },
+
+          -- Git/Hunk group
+          { '<leader>h', group = 'Git Hunk', mode = { 'n', 'v' } },
+          { '<leader>hs', desc = 'Stage hunk', mode = { 'n', 'v' } },
+          { '<leader>hr', desc = 'Reset hunk', mode = { 'n', 'v' } },
+          { '<leader>hu', desc = 'Undo stage hunk' },
+          { '<leader>hp', desc = 'Preview hunk' },
+          { '<leader>hb', desc = 'Blame line' },
+          { '<leader>hd', desc = 'Diff this' },
+          { '<leader>hD', desc = 'Diff this ~' },
+
+          -- Harpoon navigation
+          { '<leader>1', desc = '[1] Harpoon file 1' },
+          { '<leader>2', desc = '[2] Harpoon file 2' },
+          { '<leader>3', desc = '[3] Harpoon file 3' },
+          { '<leader>4', desc = '[4] Harpoon file 4' },
+          { '<leader>hp', desc = 'Previous harpoon file' },
+          { '<leader>hn', desc = 'Next harpoon file' },
+
+          -- Overseer tasks
+          { '<leader>o', desc = 'Toggle Overseer tasks' },
+          { '<leader>r', desc = 'Run Overseer task' },
+
+          -- LSP keymaps (shown when LSP is active)
+          { 'grn', desc = 'LSP: Rename symbol' },
+          { 'gra', desc = 'LSP: Code action', mode = { 'n', 'x' } },
+          { 'grr', desc = 'LSP: References' },
+          { 'gri', desc = 'LSP: Implementation' },
+          { 'grd', desc = 'LSP: Definition' },
+          { 'grD', desc = 'LSP: Declaration' },
+          { 'grt', desc = 'LSP: Type definition' },
+          { 'gO', desc = 'LSP: Document symbols' },
+          { 'gW', desc = 'LSP: Workspace symbols' },
+
+          -- Function keys
+          { '<F1>', desc = 'Debug: Step Into' },
+          { '<F2>', desc = 'Debug: Step Over' },
+          { '<F3>', desc = 'Debug: Step Out' },
+          { '<F5>', desc = 'Debug: Start/Continue' },
+          { '<F6>', desc = 'Build Project' },
+          { '<F7>', desc = 'Debug: Toggle UI' },
+
+          -- Terminal
+          { '<C-\\>', desc = 'Toggle Terminal' },
+
+          -- Window navigation
+          { '<C-h>', desc = 'Left window' },
+          { '<C-l>', desc = 'Right window' },
+          { '<C-j>', desc = 'Lower window' },
+          { '<C-k>', desc = 'Upper window' },
+
+          -- Other
+          { '<C-e>', desc = 'Harpoon quick menu' },
+          { '<leader>q', desc = 'Diagnostic quickfix list' },
+        },
+      }
+    end,
+  },
+
+  -- Graphics programming helper: shader preview (optional but cool)
+  {
+    'sophacles/vim-processing',
+    ft = { 'processing' },
+  },
+
   require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
 }, {
   ui = {
     icons = vim.g.have_nerd_font and {} or {
-      cmd = '⌘',
-      config = '🛠',
-      event = '📅',
-      ft = '📂',
-      init = '⚙',
-      keys = '🗝',
-      plugin = '🔌',
-      runtime = '💻',
-      require = '🌙',
-      source = '📄',
-      start = '🚀',
-      task = '📌',
-      lazy = '💤 ',
+      cmd = 'CMD',
+      config = 'CFG',
+      event = 'EVT',
+      ft = 'FT',
+      init = 'INIT',
+      keys = 'KEY',
+      plugin = 'PLG',
+      runtime = 'RUN',
+      require = 'REQ',
+      source = 'SRC',
+      start = 'GO',
+      task = 'TSK',
+      lazy = 'ZZZ',
     },
   },
 })

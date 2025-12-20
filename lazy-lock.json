@@ -39,5 +39,7 @@
   "toggleterm.nvim": { "branch": "main", "commit": "50ea089fc548917cc3cc16b46a8211833b9e3c7c" },
   "torchlight.nvim": { "branch": "main", "commit": "2d35ed20672b58a3d93b315abeac2c5a074a95c7" },
   "vim-fugitive": { "branch": "master", "commit": "61b51c09b7c9ce04e821f6cf76ea4f6f903e3cf4" },
+  "vim-glsl": { "branch": "master", "commit": "40dd0b143ef93f3930a8a409f60c1bb85e28b727" },
+  "vim-processing": { "branch": "master", "commit": "91aaa18a54f8e507e48353ba87b1eb4ecd82a17c" },
   "which-key.nvim": { "branch": "main", "commit": "3aab2147e74890957785941f0c1ad87d0a44c15a" }
 }
