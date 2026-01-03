@@ -59,7 +59,8 @@ end
 -- Custom keymaps
 vim.keymap.set('n', '<Leader>;', ':NvimTreeFindFileToggle<CR>', { desc = 'Toggle File tree', noremap = true, silent = true })
 vim.keymap.set('n', '<Leader>o', ':OverseerToggle<CR>', { desc = 'Toggle Overseer', noremap = true, silent = true })
-vim.keymap.set('n', '<Leader>r', ':OverseerRun<CR>', { desc = 'Run Overseer Task', noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>ro', ':OverseerRun<CR>', { desc = 'Run Overseer Task', noremap = true, silent = true })
+vim.keymap.set('n', '<leader>ra', vim.lsp.buf.code_action, { desc = 'Run Code Action (QuickFix)', silent = true })
 
 -- CMake keymaps
 vim.keymap.set('n', '<Leader>cg', ':CMakeGenerate<CR>', { desc = '[C]Make [G]enerate', noremap = true, silent = true })
@@ -339,11 +340,16 @@ require('lazy').setup({
     opts = {
       cmake_command = 'cmake',
       cmake_build_directory = 'build/${variant:buildType}',
+      -- Add this section to automate symlinking for Clangd
+      cmake_compile_commands_from_lsp_config = false,
+      cmake_softlink_compile_commands = true, -- Automatically symlink build/Debug/compile_commands.json to root
+
       cmake_generate_options = {
         '-DCMAKE_EXPORT_COMPILE_COMMANDS=1',
         '-DCMAKE_C_COMPILER=clang',
         '-DCMAKE_CXX_COMPILER=clang++',
-        '-GNinja',
+        '-G',
+        'Ninja',
       },
       cmake_build_options = {},
       cmake_console_size = 10,
@@ -590,15 +596,16 @@ require('lazy').setup({
 
       local servers = {
         clangd = {
+          mason = false,
           cmd = {
-            'clangd',
+            '/usr/bin/clangd',
             '--background-index',
             '--clang-tidy',
+            '--experimental-modules-support',
             '--header-insertion=iwyu',
             '--completion-style=detailed',
             '--function-arg-placeholders',
             '--fallback-style=llvm',
-            '--compile-commands-dir=build',
           },
           init_options = {
             usePlaceholders = true,
@@ -615,6 +622,12 @@ require('lazy').setup({
               'CMakeLists.txt',
               '.git'
             )(fname)
+          end,
+          on_new_config = function(new_config, new_cwd)
+            local status, cmake = pcall(require, 'cmake-tools')
+            if status then
+              cmake.clangd_on_new_config(new_config)
+            end
           end,
         },
         glsl_analyzer = {
@@ -738,13 +751,27 @@ require('lazy').setup({
     },
   },
 
+  -- OLD THEME
+  -- {
+  --   'skylarmb/torchlight.nvim',
+  --   lazy = false,
+  --   priority = 1000,
+  --   opts = {
+  --     contrast = 'hard',
+  --   },
+  -- },
+  --
   {
-    'skylarmb/torchlight.nvim',
+    'Oniup/ignite.nvim',
     lazy = false,
     priority = 1000,
-    opts = {
-      contrast = 'hard',
-    },
+    config = function()
+      require('ignite').setup()
+      vim.cmd [[
+            syntax enable
+            colorscheme ignite
+        ]]
+    end,
   },
 
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
