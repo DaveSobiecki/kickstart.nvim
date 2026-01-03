@@ -74,6 +74,17 @@ vim.keymap.set('n', '<Leader>ct', ':CMakeSelectBuildTarget<CR>', { desc = '[C]Ma
 local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
+-- === Setup AutoCommand for C++ files --
+vim.api.nvim_create_autocmd({ 'FileType' }, {
+  pattern = { 'c', 'cpp', 'h', 'hpp', 'cppm' },
+  callback = function()
+    vim.bo.tabstop = 2
+    vim.bo.softtabstop = 2
+    vim.bo.shiftwidth = 2
+    vim.bo.expandtab = true
+  end,
+})
+
 -- [[ Configure and install plugins ]]
 require('lazy').setup({
   'numToStr/Comment.nvim',
